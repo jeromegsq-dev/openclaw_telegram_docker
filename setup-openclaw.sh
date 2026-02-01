@@ -154,7 +154,8 @@ else
     echo "  4. Copy the bot token"
     echo ""
 
-    read -p "Enter your Telegram bot token: " TELEGRAM_BOT_TOKEN
+    read -sp "Enter your Telegram bot token: " TELEGRAM_BOT_TOKEN
+    echo
     echo ""
     echo "To get your Z.ai API key:"
     echo "  1. Login to Z.ai"
@@ -162,7 +163,8 @@ else
     echo "  3. Create a new API key"
     echo ""
 
-    read -p "Enter your Z.ai API key (sk-xxx): " ZAI_API_KEY
+    read -sp "Enter your Z.ai API key: " ZAI_API_KEY
+    echo
 
     if [[ -z "$TELEGRAM_BOT_TOKEN" ]]; then
         print_error "Telegram token is required."
