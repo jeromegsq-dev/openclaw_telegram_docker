@@ -1,0 +1,15 @@
+# Environment variables
+.env
+
+# OpenClaw directory (cloned repo)
+openclaw/
+
+# Claude settings
+.claude/
+
+# Logs
+*.log
+
+# Temporary files
+*.tmp
+*.bak
