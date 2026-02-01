@@ -7,7 +7,14 @@
 #   ./logs.sh                    # Last 100 lines, follow mode
 #   ./logs.sh --tail=50          # Last 50 lines, follow mode
 #   ./logs.sh --tail=1000        # Last 1000 lines, follow mode
-#   ./logs.sh --tail=10 --follow # Last 10 lines, follow mode
+#   ./logs.sh --no-log-prefix    # Without log prefix
 
 cd openclaw
-podman-compose logs --tail=100 -f "$@" openclaw-gateway
+
+if [ $# -eq 0 ]; then
+    # No arguments provided, use defaults
+    podman-compose logs --tail=100 -f openclaw-gateway
+else
+    # User provided arguments, use them instead
+    podman-compose logs "$@" openclaw-gateway
+fi
