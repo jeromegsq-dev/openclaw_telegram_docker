@@ -51,7 +51,7 @@ For verbose output:
 ### 4. Access the Web Interface
 
 ```bash
-./get-token.sh
+./get-dashboard-url.sh
 ```
 
 Copy the URL and open it in your browser.
