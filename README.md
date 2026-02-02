@@ -102,8 +102,9 @@ Copy the URL and open it in your browser.
 - `./setup-openclaw.sh` - Install and configure OpenClaw
 - `./setup-openclaw.sh -v` - Install with verbose output
 - `./setup-openclaw.sh --help` - Show help
-- `./get-token.sh` - Get the web interface URL with token
+- `./get-dashboard-url.sh` - Get the web interface URL with token
 - `./approve-telegram.sh <code>` - Approve Telegram pairing
+- `./terminal.sh` - Open a shell in the OpenClaw gateway container
 - `./clean.sh` - Clean everything (removes containers, volumes, images)
 
 ## Configuration
@@ -138,6 +139,14 @@ PRIMARY_MODEL=zai/claude-3-opus-20240229
 ```
 
 ## Troubleshooting
+
+### Open a shell in the container
+
+```bash
+./terminal.sh
+```
+
+This opens an interactive shell in the running OpenClaw gateway container.
 
 ### Check logs
 
