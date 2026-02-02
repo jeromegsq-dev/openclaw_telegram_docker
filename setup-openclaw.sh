@@ -55,10 +55,6 @@ done
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 OPENCLAW_DIR="$SCRIPT_DIR/openclaw"
 
-# Use Podman instead of Docker
-CONTAINER_ENGINE="podman"
-COMPOSE_CMD="podman-compose"
-
 # Colors
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -70,7 +66,7 @@ print_header() {
     echo ""
     echo -e "${BLUE}=========================================${NC}"
     echo -e "${BLUE}  OpenClaw + Telegram + Z.ai Installer${NC}"
-    echo -e "${BLUE}  (Everything in Docker, nothing on host)${NC}"
+    echo -e "${BLUE}  (Everything in containers, nothing on host)${NC}"
     echo -e "${BLUE}=========================================${NC}"
     echo ""
 }
@@ -95,31 +91,88 @@ print_progress() {
     echo -e "${BLUE}▸${NC} $1"
 }
 
+print_warning() {
+    echo -e "${YELLOW}[WARNING]${NC} $1"
+}
+
 # === HEADER ===
 print_header
 
-# === VERIFY PODMAN ===
-print_step "Checking prerequisites..."
+# === DETECT CONTAINER ENGINE ===
+print_step "Checking container engine..."
 
-if ! command -v $CONTAINER_ENGINE &> /dev/null; then
-    print_error "Podman is not installed."
-    echo "Install Podman: brew install podman"
+HAS_PODMAN=false
+HAS_DOCKER=false
+CONTAINER_ENGINE=""
+COMPOSE_CMD=""
+
+# Check for Podman
+if command -v podman &> /dev/null; then
+    HAS_PODMAN=true
+    print_ok "Podman found: $(podman --version)"
+fi
+
+# Check for Docker
+if command -v docker &> /dev/null; then
+    HAS_DOCKER=true
+    print_ok "Docker found: $(docker --version)"
+fi
+
+# Decide which engine to use
+if [[ "$HAS_PODMAN" == "true" ]]; then
+    CONTAINER_ENGINE="podman"
+    COMPOSE_CMD="podman-compose"
+    print_ok "Using Podman (recommended)"
+elif [[ "$HAS_DOCKER" == "true" ]]; then
+    CONTAINER_ENGINE="docker"
+    COMPOSE_CMD="docker-compose"
+    print_warning "Using Docker (Podman is recommended but Docker works too)"
+else
+    print_error "No container engine found!"
+    echo ""
+    echo "You need either Podman or Docker to run OpenClaw."
+    echo ""
+    echo "Install Podman (recommended):"
+    echo "  - Ubuntu/Debian: sudo apt install podman"
+    echo "  - Fedora: sudo dnf install podman"
+    echo "  - macOS: brew install podman"
+    echo ""
+    echo "Install Docker:"
+    echo "  - Ubuntu: https://docs.docker.com/engine/install/ubuntu/"
+    echo "  - macOS: brew install --cask docker"
+    echo ""
     exit 1
 fi
 
+# Check for compose command
 if ! command -v $COMPOSE_CMD &> /dev/null; then
-    print_error "podman-compose is not available."
-    echo "Install it: pip install podman-compose"
-    exit 1
+    if [[ "$CONTAINER_ENGINE" == "podman" ]]; then
+        print_error "podman-compose is not installed."
+        echo "Install it: pip install podman-compose"
+        echo "Or: pip3 install podman-compose"
+        exit 1
+    else
+        print_error "docker-compose is not installed."
+        echo "Install it: pip install docker-compose"
+        echo "Or: https://docs.docker.com/compose/install/"
+        exit 1
+    fi
 fi
 
+print_ok "Compose command available: $COMPOSE_CMD"
+
+# Verify container engine is working
 if ! $CONTAINER_ENGINE info &> /dev/null; then
-    print_error "Podman is not running."
-    echo "Start it: podman machine start"
+    print_error "$CONTAINER_ENGINE is not working properly."
+    if [[ "$CONTAINER_ENGINE" == "podman" ]]; then
+        echo "Try: podman system service --time-interval=0 &"
+    else
+        echo "Make sure Docker daemon is running."
+    fi
     exit 1
 fi
 
-print_ok "Podman is ready"
+print_ok "Container engine is ready"
 
 # === LOAD .ENV IF EXISTS ===
 if [[ -f "$SCRIPT_DIR/.env" ]]; then
