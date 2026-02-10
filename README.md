@@ -12,10 +12,42 @@ Easy setup for OpenClaw with Telegram integration using Docker/Podman, configure
 
 ## Prerequisites
 
-- **Podman** (or Docker)
-- **podman-compose** (or docker-compose)
+- **Podman** (required, Docker is NOT supported)
+- **podman-compose**
 - **Telegram Bot Token** - Get it from [@BotFather](https://t.me/BotFather)
 - **Z.ai API Key** - Get it from [Z.ai](https://z.ai/manage-apikey/apikey-list)
+
+### Why Podman only?
+
+⚠️ **Docker is intentionally NOT supported** for security reasons:
+
+| Feature | Podman ✅ | Docker ❌ |
+|---------|----------|-----------|
+| Rootless by default | Yes | No |
+| Daemon runs as | User | Root |
+| Security model | Secure | Privileged |
+| CVE vulnerabilities | Fewer | More |
+
+**Podman benefits:**
+- ✓ Rootless architecture (no root daemon)
+- ✓ More secure isolation
+- ✓ Drop-in replacement for Docker
+- ✓ Better security boundaries
+
+**Install Podman:**
+```bash
+# Ubuntu/Debian
+sudo apt install podman
+
+# Fedora
+sudo dnf install podman
+
+# macOS
+brew install podman
+
+# Install podman-compose
+pip install podman-compose
+```
 
 ## Quick Start
 
@@ -70,8 +102,9 @@ Copy the URL and open it in your browser.
 - `./setup-openclaw.sh` - Install and configure OpenClaw
 - `./setup-openclaw.sh -v` - Install with verbose output
 - `./setup-openclaw.sh --help` - Show help
-- `./get-token.sh` - Get the web interface URL with token
+- `./get-dashboard-url.sh` - Get the web interface URL with token
 - `./approve-telegram.sh <code>` - Approve Telegram pairing
+- `./terminal.sh` - Open a shell in the OpenClaw gateway container
 - `./clean.sh` - Clean everything (removes containers, volumes, images)
 
 ## Configuration
@@ -106,6 +139,14 @@ PRIMARY_MODEL=zai/claude-3-opus-20240229
 ```
 
 ## Troubleshooting
+
+### Open a shell in the container
+
+```bash
+./terminal.sh
+```
+
+This opens an interactive shell in the running OpenClaw gateway container.
 
 ### Check logs
 

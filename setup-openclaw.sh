@@ -98,28 +98,66 @@ print_progress() {
 # === HEADER ===
 print_header
 
-# === VERIFY PODMAN ===
+# === ENFORCE PODMAN FOR SECURITY ===
 print_step "Checking prerequisites..."
 
-if ! command -v $CONTAINER_ENGINE &> /dev/null; then
+CONTAINER_ENGINE="podman"
+COMPOSE_CMD="podman-compose"
+
+# Check for Podman
+if ! command -v podman &> /dev/null; then
     print_error "Podman is not installed."
-    echo "Install Podman: brew install podman"
+    echo ""
+    echo "⚠️  SECURITY REQUIREMENT: This project requires Podman, not Docker."
+    echo ""
+    echo "Why Podman?"
+    echo "  ✓ Rootless by default (no daemon running as root)"
+    echo "  ✓ More secure architecture (no privileged daemon)"
+    echo "  ✓ Compatible with Docker workflows"
+    echo "  ✓ Better isolation and security boundaries"
+    echo ""
+    echo "Docker is NOT supported because:"
+    echo "  ✗ Runs as root daemon (security risk)"
+    echo "  ✗ Gives container access to host system"
+    echo "  ✗ Privileged escalation vulnerabilities"
+    echo ""
+    echo "Install Podman:"
+    echo "  Ubuntu/Debian:  sudo apt install podman"
+    echo "  Fedora:         sudo dnf install podman"
+    echo "  Arch:           sudo pacman -S podman"
+    echo "  macOS:          brew install podman"
+    echo ""
     exit 1
 fi
 
-if ! command -v $COMPOSE_CMD &> /dev/null; then
-    print_error "podman-compose is not available."
-    echo "Install it: pip install podman-compose"
+print_ok "Podman found: $(podman --version)"
+
+# Check for podman-compose
+if ! command -v podman-compose &> /dev/null; then
+    print_error "podman-compose is not installed."
+    echo ""
+    echo "Install podman-compose:"
+    echo "  pip install podman-compose"
+    echo "  or: pip3 install podman-compose"
+    echo "  or: python3 -m pip install podman-compose"
+    echo ""
     exit 1
 fi
 
-if ! $CONTAINER_ENGINE info &> /dev/null; then
-    print_error "Podman is not running."
-    echo "Start it: podman machine start"
+print_ok "podman-compose found"
+
+# Verify Podman is working
+if ! podman info &> /dev/null; then
+    print_error "Podman is not working properly."
+    echo ""
+    echo "Start Podman:"
+    echo "  Linux:  sudo systemctl start podman (if using service)"
+    echo "  macOS:  podman machine init && podman machine start"
+    echo ""
     exit 1
 fi
 
-print_ok "Podman is ready"
+print_ok "Podman is ready and secure ✓"
 
 # === LOAD .ENV IF EXISTS ===
 if [[ -f "$SCRIPT_DIR/.env" ]]; then
